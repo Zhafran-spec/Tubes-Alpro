@@ -1,0 +1,490 @@
+package main
+
+import (
+	"fmt"
+)
+
+// Konstanta batas maksimum menu
+const NMAX = 100
+
+// Struct untuk spesifikasi poin b: rincian harga, komposisi, ketersediaan
+type Menu struct {
+	ID        string
+	Nama      string
+	Kategori  string
+	Harga     float64
+	Komposisi string
+	Tersedia  bool
+}
+
+// Struct untuk menampung array of struct
+type TabMenu struct {
+	data [NMAX]Menu
+	n    int
+}
+
+func main() {
+	var daftarMenu TabMenu
+	var pilihanUtama int
+	var selesaiUtama bool = false
+
+	for !selesaiUtama {
+		fmt.Println("\n=== APLIKASI KATALOG MENU DIGITAL CAFE (CAFE-MENU) ===")
+		fmt.Println("1. Akses Admin (Kelola Menu)")
+		fmt.Println("2. Akses Pelanggan (Cari & Urutkan)")
+		fmt.Println("0. Keluar")
+		fmt.Print("Pilih akses pengguna: ")
+		fmt.Scan(&pilihanUtama)
+
+		if pilihanUtama == 0 {
+			selesaiUtama = true
+			fmt.Println("Terima kasih telah menggunakan aplikasi Cafe-Menu.")
+		} else if pilihanUtama == 1 {
+			menuAdmin(&daftarMenu)
+		} else if pilihanUtama == 2 {
+			menuPelanggan(&daftarMenu)
+		} else {
+			fmt.Println("Pilihan tidak valid.")
+		}
+	}
+}
+
+// ==============================================================================
+// FITUR ADMIN (POIN A)
+// ==============================================================================
+
+func menuAdmin(T *TabMenu) {
+	var pilihan int
+	var selesai bool = false
+
+	for !selesai {
+		fmt.Println("\n--- MENU ADMIN ---")
+		fmt.Println("1. Tambah Data Menu")
+		fmt.Println("2. Ubah Data Menu")
+		fmt.Println("3. Hapus Data Menu")
+		fmt.Println("0. Kembali")
+		fmt.Print("Pilih aksi: ")
+		fmt.Scan(&pilihan)
+
+		if pilihan == 0 {
+			selesai = true
+		} else if pilihan == 1 {
+			tambahMenu(T)
+		} else if pilihan == 2 {
+			ubahMenu(T)
+		} else if pilihan == 3 {
+			hapusMenu(T)
+		} else {
+			fmt.Println("Pilihan tidak valid.")
+		}
+	}
+}
+
+func tambahMenu(T *TabMenu) {
+	if T.n < NMAX {
+		fmt.Print("ID Menu: ")
+		fmt.Scan(&T.data[T.n].ID)
+		fmt.Print("Nama Menu (Gunakan_Underscore_Untuk_Spasi): ")
+		fmt.Scan(&T.data[T.n].Nama)
+		fmt.Print("Kategori (contoh: coffee/non-coffee): ")
+		fmt.Scan(&T.data[T.n].Kategori)
+		fmt.Print("Harga Menu: ")
+		fmt.Scan(&T.data[T.n].Harga)
+		fmt.Print("Komposisi Bahan (Gunakan_Underscore): ")
+		fmt.Scan(&T.data[T.n].Komposisi)
+		fmt.Print("Status Tersedia (true/false): ")
+		fmt.Scan(&T.data[T.n].Tersedia)
+
+		T.n++
+		fmt.Println("Berhasil! Data menu ditambahkan.")
+	} else {
+		fmt.Println("Gagal! Kapasitas menu sudah penuh.")
+	}
+}
+
+func ubahMenu(T *TabMenu) {
+	var idCari string
+	fmt.Print("Masukkan ID menu yang akan diubah: ")
+	fmt.Scan(&idCari)
+
+	var found bool = false
+	var i int = 0
+
+	for i < T.n && !found {
+		if T.data[i].ID == idCari {
+			found = true
+			fmt.Println("Menu ditemukan. Silakan masukkan data baru:")
+			fmt.Print("Nama Menu Baru: ")
+			fmt.Scan(&T.data[i].Nama)
+			fmt.Print("Kategori Baru: ")
+			fmt.Scan(&T.data[i].Kategori)
+			fmt.Print("Harga Baru: ")
+			fmt.Scan(&T.data[i].Harga)
+			fmt.Print("Komposisi Baru: ")
+			fmt.Scan(&T.data[i].Komposisi)
+			fmt.Print("Status Tersedia Baru (true/false): ")
+			fmt.Scan(&T.data[i].Tersedia)
+			fmt.Println("Berhasil! Data menu diubah.")
+		}
+		i++
+	}
+
+	if !found {
+		fmt.Println("Menu dengan ID tersebut tidak ditemukan.")
+	}
+}
+
+func hapusMenu(T *TabMenu) {
+	var idCari string
+	fmt.Print("Masukkan ID menu yang akan dihapus: ")
+	fmt.Scan(&idCari)
+
+	var found bool = false
+	var i int = 0
+	var idxHapus int = -1
+
+	for i < T.n && !found {
+		if T.data[i].ID == idCari {
+			found = true
+			idxHapus = i
+		}
+		i++
+	}
+
+	if found {
+		var j int = idxHapus
+		for j < T.n-1 {
+			T.data[j] = T.data[j+1]
+			j++
+		}
+		T.n--
+		fmt.Println("Berhasil! Data menu dihapus.")
+	} else {
+		fmt.Println("Menu tidak ditemukan.")
+	}
+}
+
+// ==============================================================================
+// FITUR PELANGGAN (PENCARIAN, PENGURUTAN & STATISTIK)
+// ==============================================================================
+
+func menuPelanggan(T *TabMenu) {
+	var pilihan int
+	var selesai bool = false
+
+	for !selesai {
+		fmt.Println("\n--- MENU PELANGGAN ---")
+		fmt.Println("1. Lihat Semua Menu")
+		fmt.Println("2. Cari Berdasarkan Kategori (Sequential Search)")
+		fmt.Println("3. Cari Berdasarkan Kategori (Binary Search)")
+		fmt.Println("4. Urutkan Harga Termurah ke Termahal (Selection Sort)")
+		fmt.Println("5. Urutkan Harga Termurah ke Termahal (Insertion Sort)")
+		fmt.Println("6. Lihat Statistik Cafe")
+		fmt.Println("7. Pesan & Hitung Total Belanja")
+		fmt.Println("0. Kembali")
+		fmt.Print("Pilih aksi: ")
+		fmt.Scan(&pilihan)	
+
+		if pilihan == 0 {
+			selesai = true
+		} else if pilihan == 1 {
+			tampilSemuaMenu(*T)
+		} else if pilihan == 2 {
+			searchSequentialKategori(*T)
+		} else if pilihan == 3 {
+			searchBinaryKategori(T)
+		} else if pilihan == 4 {
+			sortSelectionHargaASC(T)
+			tampilSemuaMenu(*T)
+		} else if pilihan == 5 {
+			sortInsertionHargaASC(T)
+			tampilSemuaMenu(*T)
+		} else if pilihan == 6 {
+			tampilStatistik(*T)
+		} else if pilihan == 7 {
+			hitungTotalPesanan(*T)
+		}else {
+			fmt.Println("Pilihan tidak valid.")
+		}
+	}
+}
+
+func tampilSatuMenu(m Menu) {
+	fmt.Printf("ID: %s | Nama: %s | Kat: %s | Harga: Rp%.2f | Komposisi: %s | Ready: %t\n",
+		m.ID, m.Nama, m.Kategori, m.Harga, m.Komposisi, m.Tersedia)
+}
+
+func tampilSemuaMenu(T TabMenu) {
+	if T.n == 0 {
+		fmt.Println("Katalog menu saat ini masih kosong.")
+	} else {
+		fmt.Println("--- KATALOG MENU ---")
+		var i int = 0
+		for i < T.n {
+			tampilSatuMenu(T.data[i])
+			i++
+		}
+	}
+}
+
+// Poin C: Sequential Search berdasarkan Kategori
+func searchSequentialKategori(T TabMenu) {
+	var katCari string
+	fmt.Print("Masukkan kategori (contoh: coffee): ")
+	fmt.Scan(&katCari)
+
+	var found bool = false
+	var i int = 0
+	fmt.Println("--- HASIL PENCARIAN (SEQUENTIAL) ---")
+	for i < T.n {
+		if T.data[i].Kategori == katCari {
+			tampilSatuMenu(T.data[i])
+			found = true
+		}
+		i++
+	}
+	if !found {
+		fmt.Println("Tidak ada menu untuk kategori tersebut.")
+	}
+}
+
+// Poin C: Binary Search berdasarkan Kategori
+func searchBinaryKategori(T *TabMenu) {
+	// Binary Search mensyaratkan data harus terurut lebih dulu berdasarkan elemen yang dicari
+	sortKategoriASC(T)
+
+	var katCari string
+	fmt.Print("Masukkan kategori (contoh: coffee): ")
+	fmt.Scan(&katCari)
+
+	var kiri int = 0
+	var kanan int = T.n - 1
+	var idxFound int = -1
+	var done bool = false
+
+	for kiri <= kanan && !done {
+		var tengah int = (kiri + kanan) / 2
+		if T.data[tengah].Kategori == katCari {
+			idxFound = tengah
+			done = true
+		} else if T.data[tengah].Kategori < katCari {
+			kiri = tengah + 1
+		} else {
+			kanan = tengah - 1
+		}
+	}
+
+	if idxFound != -1 {
+		// Tarik indeks ke belakang jika ada duplikat kategori agar tercetak semua
+		var i int = idxFound
+		for i > 0 && T.data[i-1].Kategori == katCari {
+			i--
+		}
+
+		var stop bool = false
+		fmt.Println("--- HASIL PENCARIAN (BINARY) ---")
+		for i < T.n && !stop {
+			if T.data[i].Kategori == katCari {
+				tampilSatuMenu(T.data[i])
+				i++
+			} else {
+				stop = true
+			}
+		}
+	} else {
+		fmt.Println("Tidak ada menu untuk kategori tersebut.")
+	}
+}
+
+// Pengurutan string kategori Ascending sebagai prasyarat Binary Search
+func sortKategoriASC(T *TabMenu) {
+	var i int = 1
+	for i < T.n {
+		var temp Menu = T.data[i]
+		var j int = i
+		for j > 0 && T.data[j-1].Kategori > temp.Kategori {
+			T.data[j] = T.data[j-1]
+			j--
+		}
+		T.data[j] = temp
+		i++
+	}
+}
+
+// Poin D: Selection Sort berdasarkan Harga (Termurah ke Termahal)
+func sortSelectionHargaASC(T *TabMenu) {
+	var i int = 0
+	for i < T.n-1 {
+		var minIdx int = i
+		var j int = i + 1
+		for j < T.n {
+			if T.data[j].Harga < T.data[minIdx].Harga {
+				minIdx = j
+			}
+			j++
+		}
+		var temp Menu = T.data[i]
+		T.data[i] = T.data[minIdx]
+		T.data[minIdx] = temp
+		i++
+	}
+	fmt.Println("Menu berhasil diurutkan berdasarkan harga (Selection Sort).")
+}
+
+// Poin D: Insertion Sort berdasarkan Harga (Termurah ke Termahal)
+func sortInsertionHargaASC(T *TabMenu) {
+	var i int = 1
+	for i < T.n {
+		var temp Menu = T.data[i]
+		var j int = i
+		for j > 0 && T.data[j-1].Harga > temp.Harga {
+			T.data[j] = T.data[j-1]
+			j--
+		}
+		T.data[j] = temp
+		i++
+	}
+	fmt.Println("Menu berhasil diurutkan berdasarkan harga (Insertion Sort).")
+}
+
+// Poin E: Statistik jumlah menu per kategori & rata-rata harga
+func tampilStatistik(T TabMenu) {
+	if T.n == 0 {
+		fmt.Println("Katalog masih kosong, tidak ada statistik.")
+	} else {
+		var totalHarga float64 = 0
+
+		// Array lokal untuk menyimpan hasil rekap kategori
+		type StatKategori struct {
+			Nama   string
+			Jumlah int
+		}
+		var arrStat [NMAX]StatKategori
+		var nStat int = 0
+
+		var i int = 0
+		for i < T.n {
+			totalHarga += T.data[i].Harga
+			
+			var foundKat bool = false
+			var j int = 0
+			// Cek apakah kategori sudah ada di array rekap
+			for j < nStat && !foundKat {
+				if arrStat[j].Nama == T.data[i].Kategori {
+					arrStat[j].Jumlah++
+					foundKat = true
+				}
+				j++
+			}
+			// Jika belum ada, masukkan sebagai kategori baru
+			if !foundKat {
+				arrStat[nStat].Nama = T.data[i].Kategori
+				arrStat[nStat].Jumlah = 1
+				nStat++
+			}
+			i++
+		}
+
+		var rataRata float64 = totalHarga / float64(T.n)
+
+		fmt.Println("\n=== STATISTIK CAFE ===")
+		fmt.Printf("Rata-rata Harga Seluruh Menu : Rp%.2f\n", rataRata)
+		fmt.Println("Jumlah Menu per Kategori     :")
+		var k int = 0
+		for k < nStat {
+			fmt.Printf(" - %s : %d item\n", arrStat[k].Nama, arrStat[k].Jumlah)
+			k++
+		}
+	}
+}
+func TOTAL(T *TabMenu) {
+	var pilihan int
+	var selesai bool = false
+
+	for !selesai {
+		fmt.Println("\n--- MENU PELANGGAN ---")
+		fmt.Println("1. Lihat Semua Menu")
+		fmt.Println("2. Cari Berdasarkan Kategori (Sequential Search)")
+		fmt.Println("3. Cari Berdasarkan Kategori (Binary Search)")
+		fmt.Println("4. Urutkan Harga Termurah ke Termahal (Selection Sort)")
+		fmt.Println("5. Urutkan Harga Termurah ke Termahal (Insertion Sort)")
+		fmt.Println("6. Lihat Statistik Cafe")
+		fmt.Println("7. Pesan & Hitung Total Belanja") // Tambahan opsi Kasir
+		fmt.Println("0. Kembali")
+		fmt.Print("Pilih aksi: ")
+		fmt.Scan(&pilihan)
+
+		if pilihan == 0 {
+			selesai = true
+		} else if pilihan == 1 {
+			tampilSemuaMenu(*T)
+		} else if pilihan == 2 {
+			searchSequentialKategori(*T)
+		} else if pilihan == 3 {
+			searchBinaryKategori(T)
+		} else if pilihan == 4 {
+			sortSelectionHargaASC(T)
+			tampilSemuaMenu(*T)
+		} else if pilihan == 5 {
+			sortInsertionHargaASC(T)
+			tampilSemuaMenu(*T)
+		} else if pilihan == 6 {
+			tampilStatistik(*T)
+		} else if pilihan == 7 {
+			hitungTotalPesanan(*T) // Memanggil fungsi baru
+		} else {
+			fmt.Println("Pilihan tidak valid.")
+		}
+	}
+}
+
+
+// Fitur: Menghitung total pesanan pelanggan
+func hitungTotalPesanan(T TabMenu) {
+	var totalBelanja float64 = 0
+	var selesaiPesan bool = false
+	var idCari string
+	var jumlah int
+
+	fmt.Println("\n--- KASIR / HITUNG PESANAN ---")
+	if T.n == 0 {
+		fmt.Println("Katalog menu masih kosong, tidak bisa memesan.")
+	}
+
+	for !selesaiPesan && T.n > 0 {
+		fmt.Print("Masukkan ID Menu yang dipesan (ketik 'SELESAI' untuk berhenti): ")
+		fmt.Scan(&idCari)
+
+		if idCari == "SELESAI" {
+			selesaiPesan = true
+		} else {
+			var found bool = false
+			var i int = 0
+			
+			// Pencarian menu menggunakan boolean flag
+			for i < T.n && !found {
+				if T.data[i].ID == idCari {
+					found = true
+					if T.data[i].Tersedia {
+						fmt.Print("Masukkan jumlah pesanan: ")
+						fmt.Scan(&jumlah)
+						var subtotal float64 = T.data[i].Harga * float64(jumlah)
+						totalBelanja = totalBelanja + subtotal
+						fmt.Printf("Ditambahkan: %d x %s (Subtotal: Rp%.2f)\n", jumlah, T.data[i].Nama, subtotal)
+					} else {
+						fmt.Println("Maaf, menu tersebut sedang tidak tersedia (habis).")
+					}
+				}
+				i++
+			}
+
+			if !found {
+				fmt.Println("Menu dengan ID tersebut tidak ditemukan.")
+			}
+		}
+	}
+
+	if T.n > 0 {
+		fmt.Printf("\n=== TOTAL YANG HARUS DIBAYAR: Rp%.2f ===\n", totalBelanja)
+	}
+}
